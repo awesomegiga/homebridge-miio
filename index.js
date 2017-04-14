@@ -7,7 +7,7 @@ const browser = require('tinkerhub-mdns').browser({
 
 const miio = require('miio');
 
-'use strict';
+"use strict";
 var Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
