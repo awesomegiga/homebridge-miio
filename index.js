@@ -59,16 +59,14 @@ function XiaomiMiio(log, config, api) {
 
 		this.api.on('didFinishLaunching', ()=> {
 			browser.start();
-			browser.on('available', (device) =>
-				addDiscoveredDevice);
+			browser.on('available', addDiscoveredDevice);
 		});
 	// }
 
 	setInterval(
 			function(){
 					browser.start();
-					browser.on('available', (device) =>
-						addDiscoveredDevice);
+					browser.on('available', addDiscoveredDevice);
 			},
 			10000
 	);
