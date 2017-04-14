@@ -22,18 +22,18 @@ module.exports = function(homebridge) {
 
   // register platform in to homebridge
   homebridge.registerPlatform("homebridge-miio", "XiaomiMiio", XiaomiMiio, true);
-}
+};
 
 // Platform constructor
 // config may be null
 // api may be null if launched from old homebridge version
 function XiaomiMiio(log, config, api) {
-	var self = this;
-
   this.log = log;
   this.config = config || {};
   this.accessories = {};
 	this.api = api;
+
+	var self = this;
 
 	var addDiscoveredDevice = function(device) {
 		var uuid = UUIDGen.generate(device.token);
