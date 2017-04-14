@@ -15,10 +15,11 @@
     "url": "http://github.com/Bluebie/homebridge-miio/issues"
   },
   "dependencies":{
-    "miio": "=0.6.0"
+    "miio": "=0.6.0",
+    "tinkerhub-mdns": "=0.1.0"
   },
   "engines": {
     "homebridge": ">=0.4.16",
-    "node": ">=7.0.0"
+    "node": ">=6.0.0"
   }
 }
