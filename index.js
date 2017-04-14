@@ -1,5 +1,5 @@
-// for discovering miio devices that advertise over MDNS
-// const mdns = require('mdns');
+"use strict";
+
 const browser = require('tinkerhub-mdns').browser({
 	type: 'miio',
 	protocol: 'udp'
@@ -7,7 +7,6 @@ const browser = require('tinkerhub-mdns').browser({
 
 const miio = require('miio');
 
-"use strict";
 var Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
