@@ -10,8 +10,6 @@ const miio = require('miio');
 var Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
-  // console.log("homebridge API version: " + homebridge.version);
-
   // Accessory must be created from PlatformAccessory Constructor
   Accessory = homebridge.platformAccessory;
 
@@ -30,13 +28,12 @@ module.exports = function(homebridge) {
 function XiaomiMiio(log, config, api) {
   this.log = log;
   this.config = config || {};
-  this.accessories = {};
-	this.api = api;
+  this.accessories = [];
 
 	var self = this;
 
 	var addDiscoveredDevice = function(device) {
-		var uuid = UUIDGen.generate(device.token);
+		var uuid = UUIDGen.generate(device.name.toString());
 		var accessory;
 
 		accessory = self.accessories[uuid];
@@ -55,20 +52,25 @@ function XiaomiMiio(log, config, api) {
 		}
 	}
 
-	// if (api) {
+	if (api) {
+		this.api = api;
 
-		this.api.on('didFinishLaunching', ()=> {
+		this.api.on('didFinishLaunching', function() {
 			browser.start();
-			browser.on('available', addDiscoveredDevice);
+			browser.on('available', (device) =>{
+				self.log('MDNS search: device available');
+				addDiscoveredDevice(device)});
 		});
-	// }
+	}
 
 	setInterval(
 			function(){
+					browser.stop();
 					browser.start();
-					browser.on('available', addDiscoveredDevice);
+					browser.on('available', (device)=>{
+						addDiscoveredDevice(device)});
 			},
-			10000
+			20000
 	);
 }
 
@@ -82,24 +84,40 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 		miioInfo.port = device.port;
 
     switch(miioInfo.type) {
-        case 'AirPurifier':
-            serviceType = Service.AirPurifier
+        case 'air-purifier':
+            serviceType = Service.AirPurifier;
             break;
         default:
-            this.log("This Xiaomi Device is not Supported (yet): %s [%s]", device.name);
+            this.log("This Xiaomi Device is not Supported (yet): %s", device.name);
     }
 
     if (serviceType === undefined) {
         return;
     }
 
-    this.log("Device found: %s [%s]", device.name, device.id);
+    this.log("Device found: %s [%s]", miioInfo.type, miioInfo.id);
 
-		var accessory = new Accessory(device.id, UUIDGen.generate(device.token));
+		var accessory = new Accessory(device.id, UUIDGen.generate(device.name.toString()));
 		var service = accessory.addService(serviceType, device.id);
 
 		this.accessories[accessory.UUID] = new miioAccessory(this.log, accessory, device);
 		this.api.registerPlatformAccessories("homebridge-miio", "XiaomiMiio", [accessory]);
+}
+
+
+XiaomiMiio.prototype.removeAccessory = function(accessory) {
+    this.log("Remove Accessory: %s", accessory.displayName);
+
+    if (this.accessories[accessory.UUID]) {
+        delete this.accessories[accessory.UUID];
+    }
+
+    this.api.unregisterPlatformAccessories("homebridge-miio", "XiaomiMiio", [accessory]);
+}
+
+XiaomiMiio.prototype.configureAccessory = function(accessory) {
+    accessory.updateReachability(false);
+    this.accessories[accessory.UUID] = accessory;
 }
 
 
@@ -111,11 +129,11 @@ function miioAccessory(log, accessory, device) {
     this.log = log;
 
     // this.setupDevice(device);
-    this.updateReachability(true);
+    // this.updateReachability(true);
 
     this.accessory.getService(Service.AccessoryInformation)
         .setCharacteristic(Characteristic.Manufacturer, "Xiaomi")
-        .setCharacteristic(Characteristic.Model, device.model)
+        .setCharacteristic(Characteristic.Model, device.type)
         .setCharacteristic(Characteristic.SerialNumber, device.id)
 
     this.accessory.on('identify', function(paired, callback) {
