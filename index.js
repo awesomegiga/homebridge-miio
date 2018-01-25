@@ -1,11 +1,9 @@
 "use strict";
 
-const browser = require('tinkerhub-mdns').browser({
-	type: 'miio',
-	protocol: 'udp'
-});
-
 const miio = require('miio');
+const browser = require('miio').devices(
+	cacheTime: 300, useTokenStorage: false,  tokens: {55067759:"5a593aeeb06f3e2861fd8de9b8597fe7"}
+);
 
 var Accessory, Service, Characteristic, UUIDGen;
 
@@ -56,7 +54,7 @@ function XiaomiMiio(log, config, api) {
 		this.api = api;
 
 		this.api.on('didFinishLaunching', function() {
-			browser.start();
+			//browser.start();
 			browser.on('available', (device) =>{
 				self.log('MDNS search: device available');
 				addDiscoveredDevice(device)});
@@ -65,8 +63,8 @@ function XiaomiMiio(log, config, api) {
 
 	setInterval(
 			function(){
-					browser.stop();
-					browser.start();
+					//browser.stop();
+					//browser.start();
 					browser.on('available', (device)=>{
 						addDiscoveredDevice(device)});
 			},
@@ -87,6 +85,9 @@ XiaomiMiio.prototype.addAccessory = function(device) {
         case 'air-purifier':
             serviceType = Service.AirPurifier;
             break;
+				case 'light':
+						serviceType = Service.Lightbulb;
+						break;
         default:
             this.log("This Xiaomi Device is not Supported (yet): %s", device.name);
     }
