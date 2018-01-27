@@ -55,9 +55,9 @@ function XiaomiMiio(log, config, api) {
 
 		this.api.on('didFinishLaunching', function() {
 			//browser.start();
-			browser.on('available', (device) =>{
+			browser.on('available', (reg) =>{
 				self.log('MDNS search: device available');
-				addDiscoveredDevice(device)});
+				addDiscoveredDevice(reg.device)});
 		});
 	}
 
@@ -65,8 +65,8 @@ function XiaomiMiio(log, config, api) {
 			function(){
 					//browser.stop();
 					//browser.start();
-					browser.on('available', (device)=>{
-						addDiscoveredDevice(device)});
+					browser.on('available', (deviceReg)=>{
+						addDiscoveredDevice(reg.device)});
 			},
 			20000
 	);
@@ -74,7 +74,8 @@ function XiaomiMiio(log, config, api) {
 
 XiaomiMiio.prototype.addAccessory = function(device) {
     var serviceType;
-		var miioInfo = miio.infoFromHostname(device.name);
+		var miioInfo = device;
+
 		if(! miioInfo) {
 			return;
 		}
@@ -85,20 +86,20 @@ XiaomiMiio.prototype.addAccessory = function(device) {
         case 'air-purifier':
             serviceType = Service.AirPurifier;
             break;
-				case 'light':
+				case 'Light':
 						serviceType = Service.Lightbulb;
 						break;
         default:
-            this.log("This Xiaomi Device is not Supported (yet): %s", device.name);
+            this.log("This Xiaomi Device is not Supported (yet): %s", miioInfo.id);
     }
 
     if (serviceType === undefined) {
         return;
     }
 
-    this.log("Device found: %s [%s]", miioInfo.type, miioInfo.id);
+    this.log("Device found: %s [%s]", miioInfo.types, miioInfo.id);
 
-		var accessory = new Accessory(device.id, UUIDGen.generate(device.name.toString()));
+		var accessory = new Accessory(device.id, UUIDGen.generate(device.is.toString()));
 		var service = accessory.addService(serviceType, device.id);
 
 		this.accessories[accessory.UUID] = new miioAccessory(this.log, accessory, device);
