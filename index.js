@@ -1,9 +1,9 @@
 "use strict";
 
 const miio = require('miio');
-const browser = require('miio').devices(
+const browser = require('miio').devices({
 	cacheTime: 300, useTokenStorage: false,  tokens: {55067759:"5a593aeeb06f3e2861fd8de9b8597fe7"}
-);
+});
 
 var Accessory, Service, Characteristic, UUIDGen;
 
