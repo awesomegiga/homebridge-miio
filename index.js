@@ -82,7 +82,7 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 		// miioInfo.address = device.addresses[0];
 		// miioInfo.port = device.port;
 
-    switch(device..metadata.types) {
+    switch(device.metadata.types) {
         case 'air-purifier':
             serviceType = Service.AirPurifier;
             break;
