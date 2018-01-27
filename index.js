@@ -79,10 +79,10 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 		if(! miioInfo) {
 			return;
 		}
-		miioInfo.address = device.addresses[0];
-		miioInfo.port = device.port;
+		// miioInfo.address = device.addresses[0];
+		// miioInfo.port = device.port;
 
-    switch(miioInfo.type) {
+    switch(miioInfo.types) {
         case 'air-purifier':
             serviceType = Service.AirPurifier;
             break;
@@ -99,7 +99,7 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 
     this.log("Device found: %s [%s]", miioInfo.types, miioInfo.id);
 
-		var accessory = new Accessory(device.id, UUIDGen.generate(device.is.toString()));
+		var accessory = new Accessory(device.id, UUIDGen.generate(device.id.toString()));
 		var service = accessory.addService(serviceType, device.id);
 
 		this.accessories[accessory.UUID] = new miioAccessory(this.log, accessory, device);
