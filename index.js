@@ -56,7 +56,7 @@ function XiaomiMiio(log, config, api) {
 		this.api.on('didFinishLaunching', function() {
 			//browser.start();
 			browser.on('available', (device) =>{
-				self.log('MDNS search: device available', device.id);
+				self.log('MDNS search: device discovered', device.model);
 				addDiscoveredDevice(device)});
 		});
 	}
@@ -66,6 +66,7 @@ function XiaomiMiio(log, config, api) {
 					//browser.stop();
 					//browser.start();
 					browser.on('available', (device)=>{
+						self.log('MDNS search: device discovered', device.model);
 						addDiscoveredDevice(device)});
 			},
 			20000
@@ -81,16 +82,14 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 		// }
 		// miioInfo.address = device.addresses[0];
 		// miioInfo.port = device.port;
-
-    switch(device.metadata.types) {
-        case 'air-purifier':
-            serviceType = Service.AirPurifier;
-            break;
-				case 'Light':
-						serviceType = Service.Lightbulb;
-						break;
-        default:
-            this.log("This Xiaomi Device is not Supported (yet): %s", device.model);
+		if(device.matches('type:air-purifier')) {
+			serviceType = Service.AirPurifier;
+		}
+		else if (device.matches('type:light')) {
+			serviceType = Service.Lightbulb;
+		}
+		else
+			this.log("This Xiaomi Device is not Supported (yet): %s", device.model);
     }
 
     if (serviceType === undefined) {
