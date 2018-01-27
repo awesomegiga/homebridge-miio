@@ -76,13 +76,13 @@ XiaomiMiio.prototype.addAccessory = function(device) {
     var serviceType;
 		var miioInfo = device;
 
-		if(! miioInfo) {
-			return;
-		}
+		// if(! miioInfo) {
+		// 	return;
+		// }
 		// miioInfo.address = device.addresses[0];
 		// miioInfo.port = device.port;
 
-    switch(miioInfo.types) {
+    switch(device..metadata.types) {
         case 'air-purifier':
             serviceType = Service.AirPurifier;
             break;
@@ -90,14 +90,14 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 						serviceType = Service.Lightbulb;
 						break;
         default:
-            this.log("This Xiaomi Device is not Supported (yet): %s", miioInfo.id);
+            this.log("This Xiaomi Device is not Supported (yet): %s", device.model);
     }
 
     if (serviceType === undefined) {
         return;
     }
 
-    this.log("Device found: %s [%s]", miioInfo.types, miioInfo.id);
+    this.log("Device found: %s [%s]", device.model, device.id);
 
 		var accessory = new Accessory(device.id, UUIDGen.generate(device.id.toString()));
 		var service = accessory.addService(serviceType, device.id);
@@ -135,7 +135,7 @@ function miioAccessory(log, accessory, device) {
 
     this.accessory.getService(Service.AccessoryInformation)
         .setCharacteristic(Characteristic.Manufacturer, "Xiaomi")
-        .setCharacteristic(Characteristic.Model, device.type)
+        .setCharacteristic(Characteristic.Model, device.model)
         .setCharacteristic(Characteristic.SerialNumber, device.id)
 
     this.accessory.on('identify', function(paired, callback) {
