@@ -55,9 +55,9 @@ function XiaomiMiio(log, config, api) {
 
 		this.api.on('didFinishLaunching', function() {
 			//browser.start();
-			browser.on('available', (reg) =>{
+			browser.on('available', (device) =>{
 				self.log('MDNS search: device available');
-				addDiscoveredDevice(reg.device)});
+				addDiscoveredDevice(device)});
 		});
 	}
 
@@ -65,8 +65,8 @@ function XiaomiMiio(log, config, api) {
 			function(){
 					//browser.stop();
 					//browser.start();
-					browser.on('available', (deviceReg)=>{
-						addDiscoveredDevice(reg.device)});
+					browser.on('available', (device)=>{
+						addDiscoveredDevice(rdevice)});
 			},
 			20000
 	);
