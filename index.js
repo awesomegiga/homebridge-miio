@@ -31,7 +31,7 @@ function XiaomiMiio(log, config, api) {
 	var self = this;
 
 	var addDiscoveredDevice = function(device) {
-		var uuid = UUIDGen.generate(device.name.toString());
+		var uuid = UUIDGen.generate(device.id.toString());
 		var accessory;
 
 		accessory = self.accessories[uuid];
