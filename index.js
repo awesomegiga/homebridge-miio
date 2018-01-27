@@ -88,7 +88,7 @@ XiaomiMiio.prototype.addAccessory = function(device) {
 		else if (device.matches('type:light')) {
 			serviceType = Service.Lightbulb;
 		}
-		else
+		else {
 			this.log("This Xiaomi Device is not Supported (yet): %s", device.model);
     }
 
