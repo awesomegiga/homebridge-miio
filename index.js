@@ -17,7 +17,7 @@ module.exports = function(homebridge) {
   UUIDGen = homebridge.hap.uuid;
 
   // register platform in to homebridge
-  homebridge.registerPlatform("homebridge-miio", "XiaomiMiio", XiaomiMiio, true);
+  homebridge.registerPlatform("homebridge-miio", "miAccessory", XiaomiMiio, true);
 };
 
 // Platform constructor
@@ -26,7 +26,9 @@ module.exports = function(homebridge) {
 function XiaomiMiio(log, config, api) {
   this.log = log;
   this.config = config || {};
-  this.accessories = [];
+  this.accessories = {};
+	this.api = api;
+
 
 	var self = this;
 
@@ -34,7 +36,6 @@ function XiaomiMiio(log, config, api) {
 		var uuid = UUIDGen.generate(device.id.toString());
 		var accessory;
 		accessory = self.accessories[uuid];
-
 
 		if (accessory === undefined) {
 			self.addAccessory(device);
@@ -50,8 +51,6 @@ function XiaomiMiio(log, config, api) {
 		}
 	}
 
-	if (api) {
-		this.api = api;
 
 		this.api.on('didFinishLaunching', function() {
 			browser.on('available', (device) =>{
@@ -59,7 +58,6 @@ function XiaomiMiio(log, config, api) {
 				if(! device.token) {console.log(device.id, 'hides its token');}
 				addDiscoveredDevice(device)});
 		});
-	}
 
 	setInterval(
 			function(){
@@ -74,34 +72,33 @@ function XiaomiMiio(log, config, api) {
 
 XiaomiMiio.prototype.addAccessory = function(device) {
     var serviceType;
-		// var miioInfo = miio.infoFromHostname(device.name);
-		// if(! miioInfo) {
-		// 	return;
-		// }
-		this.log('Try to add device', device.id, device.model, device.token)
+
+		this.log('Try to add device', device.id, device.model, device.token);
+
 		if(device.device.matches('type:air-purifier')) {
 			this.log('device type is air-purifier');
 			serviceType = Service.AirPurifier;
 		}
-		if(device.device.matches('type:light')) {
-		  this.log('device type is light');
+		else if(device.id.toString() == "55067759"){
+		// else if(device.device.matches('type:light')) {
+			this.log('device type is light');
 			serviceType = Service.Lightbulb;
 		}
-		// else{
-		// 	this.log("This Xiaomi Device is not Supported (yet): %s", device.token);
-		// }
+		else{
+			this.log("This Xiaomi Device is not Supported (yet): %s", device.model);
+		}
 
-    if (serviceType === undefined) {
-        return;
-    }
+		if (serviceType === undefined) {
+		    return;
+		}
 
     this.log("Device found: %s [%s]", device.model, device.id);
 
-		var accessory = new Accessory(device.id, UUIDGen.generate(device.id.toString()));
-		var service = accessory.addService(serviceType, device.id);
+		var accessory = new Accessory(device.model.toString(), UUIDGen.generate(device.id.toString()));
+		var service = accessory.addService(serviceType, device.model.toString());
 
 		this.accessories[accessory.UUID] = new miioAccessory(this.log, accessory, device);
-		this.api.registerPlatformAccessories("homebridge-miio", "XiaomiMiio", [accessory]);
+		this.api.registerPlatformAccessories("homebridge-miio", "miAccessory", [accessory]);
 }
 
 XiaomiMiio.prototype.removeAccessory = function(accessory) {
@@ -111,9 +108,13 @@ XiaomiMiio.prototype.removeAccessory = function(accessory) {
         delete this.accessories[accessory.UUID];
     }
 
-    this.api.unregisterPlatformAccessories("homebridge-miio", "XiaomiMiio", [accessory]);
+    this.api.unregisterPlatformAccessories("homebridge-miio", "miAccessory", [accessory]);
 }
 
+
+XiaomiMiio.prototype.configureAccessory = function(accessory) {
+    this.accessories[accessory.UUID] = accessory;
+}
 
 
 function miioAccessory(log, accessory, device) {
@@ -129,7 +130,7 @@ function miioAccessory(log, accessory, device) {
     this.accessory.getService(Service.AccessoryInformation)
         .setCharacteristic(Characteristic.Manufacturer, "Xiaomi")
         .setCharacteristic(Characteristic.Model, device.model)
-        .setCharacteristic(Characteristic.SerialNumber, device.id)
+        .setCharacteristic(Characteristic.SerialNumber, device.id);
 
     this.accessory.on('identify', function(paired, callback) {
         self.log("%s - identify", self.accessory.displayName);
@@ -140,14 +141,14 @@ function miioAccessory(log, accessory, device) {
     this.addEventHandlers();
 }
 
-miioAccessory.prototype.updateReachability = function(reachable) {
-    this.accessory.updateReachability(reachable);
-}
-
-miioAccessory.prototype.configureAccessory = function(accessory) {
-    accessory.updateReachability(false);
-    this.accessories[accessory.UUID] = accessory;
-}
+// miioAccessory.prototype.updateReachability = function(reachable) {
+//     this.accessory.updateReachability(reachable);
+// }
+//
+// miioAccessory.prototype.configureAccessory = function(accessory) {
+//     accessory.updateReachability(false);
+//     this.accessories[accessory.UUID] = accessory;
+// }
 
 miioAccessory.prototype.addEventHandler = function(serviceName, characteristic) {
 		if (service === undefined) {
